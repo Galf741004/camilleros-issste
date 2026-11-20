@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Comisiones y viáticos de camillería | ISSSTE León</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --issste-verde: #10312B;
+      --issste-guinda: #9F2241;
+      --issste-dorado: #BC955C;
+      --fondo-gris: #F1F5F9;
+      --borde-input: #CBD5E1;
+      --header-height: 60px;
+      --sidebar-width: 270px;
+      --campo-lleno-bg: #F0FDF4;
+      --campo-lleno-borde: #86EFAC;
+      --campo-lleno-texto: #14532D;
+    }
+    body { background-color: var(--fondo-gris); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #1E293B; margin: 0; -webkit-tap-highlight-color: transparent; }
+    .auth-view { display: none; min-height: 100vh; justify-content: center; align-items: center; padding: 16px; background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%); }
+    .auth-view.active { display: flex; }
+    .auth-card { background: #FFFFFF; border-radius: 12px; padding: 28px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); width: 100%; max-width: 400px; }
+    .fixed-header { position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height); background-color: var(--issste-verde); color: #FFFFFF; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 1030; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .hamburger-btn { background: none; border: none; font-size: 24px; color: #FFFFFF; padding: 6px; cursor: pointer; display: flex; align-items: center; }
+    .sidebar-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); z-index: 1019; display: none; backdrop-filter: blur(2px); }
+    .sidebar-backdrop.active { display: block; }
+    .sidebar { height: calc(100vh - var(--header-height)); width: var(--sidebar-width); position: fixed; top: var(--header-height); left: calc(-1 * var(--sidebar-width)); background-color: #FFFFFF; border-right: 1px solid var(--borde-input); transition: left 0.28s ease-in-out; display: flex; flex-direction: column; z-index: 1020; }
+    .sidebar.active { left: 0; }
+    .sidebar-menu { flex-grow: 1; overflow-y: auto; padding-top: 8px; }
+    .sidebar-btn { background: none; border: none; width: 100%; text-align: left; padding: 14px 20px; color: #334155; font-size: 0.95rem; font-weight: 500; border-left: 4px solid transparent; display: flex; align-items: center; gap: 12px; min-height: 48px; }
+    .sidebar-btn:hover, .sidebar-btn.active { background-color: #F8FAFC; color: var(--issste-guinda); border-left-color: var(--issste-guinda); font-weight: 600; }
+    .logout-btn { color: #DC2626 !important; border-top: 1px solid #E2E8F0; padding: 16px 20px; font-weight: 600; cursor: pointer; }
+    .app-main-content { padding: 76px 12px 30px 12px; transition: margin-left 0.28s ease-in-out; }
+    @media (min-width: 992px) {
+      .app-main-content { padding: 80px 24px 30px 24px; }
+      .sidebar.active ~ .app-main-content { margin-left: var(--sidebar-width); }
+    }
+    .main-card { background: #FFFFFF; border: none; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); overflow: hidden; }
+    .barra-busqueda-universal { background-color: #FFFFFF; border: 1.5px solid var(--borde-input); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .form-label { font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+    input[type="text"] { text-transform: uppercase; }
+    .form-control, .form-select { border: 1.5px solid var(--borde-input); border-radius: 6px; padding: 10px 12px; font-size: 0.95rem; min-height: 42px; }
+    .form-control:focus, .form-select:focus { border-color: var(--issste-verde); box-shadow: 0 0 0 3px rgba(16,49,43,0.15); }
+    .campo-lleno { background-color: var(--campo-lleno-bg) !important; border-color: var(--campo-lleno-borde) !important; color: var(--campo-lleno-texto) !important; font-weight: 600; }
+    .campo-error { background-color: #FEF2F2 !important; border-color: #F87171 !important; color: #991B1B !important; }
+    .form-control[readonly] { background-color: #F8FAFC; color: #475569; font-weight: 600; }
+    .seccion-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+    @media (min-width: 768px) { .seccion-card { padding: 18px; } }
+    .seccion-header { font-size: 0.9rem; font-weight: 700; color: var(--issste-verde); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; border-bottom: 1.5px solid var(--issste-dorado); padding-bottom: 4px; }
+    .barra-acciones-footer { background-color: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 14px 16px; }
+    .btn-guinda { background-color: var(--issste-guinda); color: #FFFFFF; font-weight: 600; border: none; padding: 10px 20px; border-radius: 6px; min-height: 42px; }
+    .btn-guinda:hover { background-color: #791A31; color: #FFFFFF; }
+    .nav-tabs-custom { background-color: #F8FAFC; border-bottom: 2px solid #E2E8F0; padding: 6px 12px 0 12px; }
+    .nav-tabs-custom .nav-link { color: #64748B; font-weight: 600; border: none; border-bottom: 3px solid transparent; padding: 10px 14px; font-size: 0.9rem; }
+    .nav-tabs-custom .nav-link.active { color: var(--issste-guinda); background: transparent; border-bottom: 3px solid var(--issste-guinda); }
+    .kpi-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .bandeja-pendientes-box { background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. LOGIN -->
+  <div id="loginView" class="auth-view active">
+    <div class="auth-card">
+      <div class="text-center mb-4">
+        <h4 class="fw-bold mb-1" style="color: var(--issste-guinda);">Control de comisiones y viáticos</h4>
+        <small class="text-muted">Hospital Regional ISSSTE León — Camillería</small>
+      </div>
+      <form id="formLogin" onsubmit="ejecutarLogin(event)">
+        <div class="mb-3">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" id="loginEmail" class="form-control" required placeholder="usuario@issste.gob.mx">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+        </div>
+        <button type="submit" id="btnLoginSubmit" class="btn btn-guinda w-100">Ingresar al sistema</button>
+        <p class="text-center text-muted small mt-3 mb-0">
+          ¿Olvidaste tu contraseña? Solicita el restablecimiento al administrador del área.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. APLICACIÓN PRINCIPAL -->
+  <div id="appView" style="display:none;">
+    <header class="fixed-header">
+      <div class="d-flex align-items-center gap-2">
+        <button class="hamburger-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <span class="fw-bold fs-6 text-truncate" style="max-width: 220px;">Comisiones | ISSSTE</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span id="headerUserName" class="small fw-semibold d-none d-sm-inline">Usuario</span>
+        <span id="headerUserRole" class="badge bg-light text-dark">Rol</span>
+      </div>
+    </header>
+
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+    <aside id="mainSidebar" class="sidebar">
+      <div class="sidebar-menu" id="sidebarMenuContainer">
+        <button class="sidebar-btn active" data-sec="seccionComisiones" onclick="mostrarSeccionApp('seccionComisiones')">
+          <i class="bi bi-file-earmark-text"></i> Generar comisiones
+        </button>
+        <button class="sidebar-btn" data-sec="seccionPerfil" onclick="mostrarSeccionApp('seccionPerfil')">
+          <i class="bi bi-person-gear"></i> Mi perfil
+        </button>
+        <div id="adminMenuSection" class="d-none">
+          <hr class="my-2">
+          <button class="sidebar-btn" data-sec="seccionCatalogos" onclick="mostrarSeccionApp('seccionCatalogos'); cargarCatalogosAdmin();">
+            <i class="bi bi-card-list"></i> Gestión de catálogos
+          </button>
+          <button class="sidebar-btn" data-sec="seccionGestionarUsuarios" onclick="mostrarSeccionApp('seccionGestionarUsuarios'); cargarUsuariosAdmin();">
+            <i class="bi bi-people"></i> Gestión de usuarios
+          </button>
+          <button class="sidebar-btn" data-sec="seccionTrazabilidad" onclick="mostrarSeccionApp('seccionTrazabilidad'); cargarTrazabilidad();">
+            <i class="bi bi-shield-check"></i> Bitácora forense
+          </button>
+          <button class="sidebar-btn" data-sec="seccionRespaldos" onclick="mostrarSeccionApp('seccionRespaldos');">
+            <i class="bi bi-cloud-arrow-down"></i> Respaldos y migración
+          </button>
+        </div>
+      </div>
+      <button class="sidebar-btn logout-btn" onclick="ejecutarLogout()">
+        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+      </button>
+    </aside>
+
+    <main class="app-main-content">
+      <div class="container-fluid" style="max-width: 1080px; padding: 0;">
+
+        <!-- SECCIÓN 1: COMISIONES -->
+        <div id="seccionComisiones" class="app-sub-section">
+          <div class="barra-busqueda-universal">
+            <div class="row g-2 align-items-center">
+              <div class="col-12 col-md-3">
+                <label class="form-label text-dark mb-1"><i class="bi bi-funnel me-1"></i>Estatus:</label>
+                <select id="filtroEstadoBusqueda" class="form-select form-select-sm">
+                  <option value="TODOS" selected>Todos los registros</option>
+                  <option value="SOLO_PENDIENTES">Solo pendientes de cierre</option>
+                  <option value="SOLO_CONCLUIDOS">Solo concluidos</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label text-dark mb-1"><i class="bi bi-search me-1"></i>Búsqueda rápida:</label>
+                <input type="text" id="inputBuscar" class="form-control form-control-sm" placeholder="RFC, empleado, camillero, cédula o folio...">
+              </div>
+              <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                <button type="button" id="btnBuscar" class="btn btn-sm btn-dark flex-grow-1" onclick="ejecutarBusquedaUniversal()">
+                  <i class="bi bi-search"></i> Buscar
+                </button>
+                <button type="button" id="btnReimprimirDirecto" class="btn btn-sm btn-success d-none" onclick="reimprimirActual()" title="Reimprimir PDF">
+                  <i class="bi bi-printer-fill"></i> Reimprimir
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="main-card">
+            <ul class="nav nav-tabs-custom" id="tabFases" role="tablist">
+              <li class="nav-item">
+                <button class="nav-link active" id="tab-salida" data-bs-toggle="tab" data-bs-target="#panel-salida" type="button" onclick="cambiarFase(1)">
+                  <i class="bi bi-send-fill me-1"></i> Fase 1: Salida (Viáticos)
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" id="tab-regreso" data-bs-toggle="tab" data-bs-target="#panel-regreso" type="button" onclick="cambiarFase(2)">
+                  <i class="bi bi-journal-check me-1"></i> Fase 2: Regreso y cierre
+                  <span id="badgeContadorPendientes" class="badge bg-warning text-dark ms-1 d-none">0</span>
+                </button>
+              </li>
+            </ul>
+
+            <form id="formComision" class="p-3 p-md-4">
+              <input type="hidden" id="registroId" value="">
+              <div class="tab-content">
+
+                <!-- FASE 1 -->
+                <div class="tab-pane fade show active" id="panel-salida">
+                  <div class="seccion-card">
+                    <div class="seccion-header"><i class="bi bi-file-earmark-check"></i> Asignación de oficio oficial (Salida)</div>
+                    <div class="row g-2 g-md-3">
+                      <div class="col-12 col-md-6">
+                        <label class="form-label">No. de oficio oficial asignado</label>
+                        <input type="text" id="numOficio" class="form-control font-monospace fw-bold text-dark bg-light" readonly required>
+                        <small class="text-muted" style="font-size: 0.76rem;">Folio único asignado automáticamente por el servidor al guardar.</small>
+                      </div>
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Fecha del oficio</label>
+                        <input type="date" id="fechaOficio" class="form-control" onchange="actualizarTextoFechaOficio()" required>
+                      </div>
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Fecha oficio (en texto formal)</label>
+                        <input type="text" id="fechaOficioTexto" class="form-control" readonly required>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="seccion-card">
+                    <div class="seccion-header"><i class="bi bi-person-badge"></i> 1. Personal comisionado</div>
+                    <div class="row g-2 g-md-3">
+                      <div class="col-12 col-md-6">
+                        <label class="form-label">Nombre del camillero</label>
+                        <select id="selectCamillero" class="form-select" onchange="autoCompletarCamillero()" required>
+                          <option value="">Seleccione personal...</option>
+                        </select>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <label class="form-label">No. de empleado</label>
+                        <input type="text" id="numEmpleado" class="form-control" readonly required>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <label class="form-label">RFC institucional</label>
+                        <input type="text" id="rfc" class="form-control" readonly required>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="seccion-card">
+                    <div class="seccion-header"><i class="bi bi-person-heart"></i> 2. Datos del paciente y expediente</div>
+                    <div class="row g-2 g-md-3">
+                      <div class="col-12 col-md-4">
+                        <label class="form-label">Nombre(s)</label>
+                        <input type="text" id="pacienteNombres" class="form-control" placeholder="Ej. Juan" required>
+                      </div>
+                      <div class="col-6 col-md-4">
+                        <label class="form-label">Primer apellido</label>
+                        <input type="text" id="pacientePaterno" class="form-control" placeholder="Ej. Pérez" required>
+                      </div>
+                      <div class="col-6 col-md-4">
+                        <label class="form-label">Segundo apellido</label>
+                        <input type="text" id="pacienteMaterno" class="form-control" placeholder="Ej. Álvarez">
+                      </div>
+                      <div class="col-12 col-md-4">
+                        <label class="form-label">RFC base paciente (10 carac.)</label>
+                        <input type="text" id="rfcPacienteBase" class="form-control" placeholder="Ej. GALF740825" maxlength="10" oninput="validarYGenerarCedula()" required>
+                        <div id="errorRfcBase" class="text-danger small mt-1 d-none" style="font-size: 0.78rem;"></div>
+                      </div>
+                      <div class="col-12 col-md-4">
+                        <label class="form-label">Tipo derechohabiente</label>
+                        <select id="selectParentesco" class="form-select" onchange="validarYGenerarCedula()" required>
+                          <option value="">Seleccione tipo...</option>
+                          <option value="10">10 — Trabajador</option>
+                          <option value="20">20 — Trabajadora</option>
+                          <option value="30">30 — Esposa</option>
+                          <option value="31">31 — Concubina</option>
+                          <option value="32">32 — Mujer</option>
+                          <option value="40">40 — Esposo</option>
+                          <option value="41">41 — Concubino</option>
+                          <option value="50">50 — Padre</option>
+                          <option value="51">51 — Abuelo</option>
+                          <option value="60">60 — Madre</option>
+                          <option value="61">61 — Abuela</option>
+                          <option value="70">70 — Hijo</option>
+                          <option value="71">71 — Hijo de cónyuge</option>
+                          <option value="80">80 — Hija</option>
+                          <option value="81">81 — Hija de cónyuge</option>
+                          <option value="90">90 — Pensionado</option>
+                          <option value="91">91 — Pensionada</option>
+                          <option value="92">92 — Familiar de pensionado</option>
+                          <option value="95">95 — Asegurado INSABI masculino</option>
+                          <option value="96">96 — Asegurado INSABI femenino</option>
+                          <option value="97">97 — IMSS hombre</option>
+                          <option value="98">98 — IMSS mujer</option>
+                          <option value="99">99 — No derechohabiente</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-4">
+                        <label class="form-label">Cédula médica / expediente</label>
+                        <input type="text" id="cedula" class="form-control" placeholder="Ej. GALF740825/10" required>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label">Hospital receptor</label>
+                        <select id="selectHospital" class="form-select" onchange="autoCompletarHospital()" required>
+                          <option value="">Seleccione hospital...</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label">Ciudad de destino</label>
+                        <input type="text" id="ciudad" class="form-control" readonly required>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="seccion-card">
+                    <div class="seccion-header"><i class="bi bi-calendar-range"></i> 3. Fechas de traslado</div>
+                    <div class="row g-2 g-md-3">
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Fecha de inicio</label>
+                        <input type="date" id="fechaInicio" class="form-control" onchange="calcularFechasComision()" required>
+                      </div>
+                      <div class="col-12 col-md-3">
+                        <label class="form-label">Fecha de término</label>
+                        <input type="date" id="fechaFin" class="form-control" onchange="calcularFechasComision()" required>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label">Intervalo formal generado</label>
+                        <input type="text" id="intervaloFechas" class="form-control" readonly required>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- FASE 2 -->
+                <div class="tab-pane fade" id="panel-regreso">
+                  <div class="row g-2 mb-3">
+                    <div class="col-4">
+                      <div class="kpi-card border-start border-4 border-warning">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">PENDIENTES CIERRE</small>
+                        <strong id="kpiPendientesCount" class="fs-5 text-dark">0</strong>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="kpi-card border-start border-4 border-success">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">CONCLUIDOS RECIENTES</small>
+                        <strong id="kpiConcluidosCount" class="fs-5 text-success">0</strong>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="kpi-card border-start border-4 border-primary">
+                        <small class="text-muted d-block" style="font-size: 0.74rem;">ÚLTIMO FOLIO</small>
+                        <strong id="kpiUltimoFolio" class="fs-5 text-primary">-</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="boxBandejaPendientes" class="bandeja-pendientes-box d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <strong class="text-dark"><i class="bi bi-inbox-fill text-warning me-1"></i>Bandeja de traslados en espera de informe y factura:</strong>
+                      <span id="labelContadorPendientes" class="badge bg-warning text-dark">0</span>
+                    </div>
+                    <div id="listaPendientesCards" class="row g-2"></div>
+                  </div>
+
+                  <div id="boxBandejaConcluidos" class="card mb-3 border border-success-subtle d-none" style="background: #F0FDF4;">
+                    <div class="card-body p-3">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="text-success"><i class="bi bi-check2-circle me-1"></i>Expedientes concluidos recientes (reimpresión rápida):</strong>
+                      </div>
+                      <div id="listaConcluidosCards" class="row g-2"></div>
+                    </div>
+                  </div>
+
+                  <div id="bannerContextoActivo" class="card mb-3 border-start border-4 border-success shadow-sm d-none" style="background-color: #F8FAFC;">
+                    <div class="card-body p-3">
+                      <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                        <span class="fw-bold text-success" style="font-size: 0.85rem;">
+                          <i class="bi bi-person-check-fill me-1"></i>Expediente seleccionado para informe final
+                        </span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="limpiarFormulario()">
+                          <i class="bi bi-x-circle me-1"></i>Cancelar selección
+                        </button>
+                      </div>
+                      <div class="row g-2" style="font-size: 0.88rem;">
+                        <div class="col-12 col-md-6">
+                          <span class="text-muted small d-block">FOLIO Y CAMILLERO:</span>
+                          <strong id="ctxOficioYCamillero" class="text-dark">-</strong>
+                          <small id="ctxCamilleroDetalle" class="text-muted d-block font-monospace">-</small>
+                        </div>
+                        <div class="col-12 col-md-6">
+                          <span class="text-muted small d-block">PACIENTE:</span>
+                          <strong id="ctxPaciente" class="text-dark">-</strong>
+                          <small id="ctxCedula" class="text-muted d-block font-monospace">-</small>
+                        </div>
+                        <div class="col-12 col-md-6">
+                          <span class="text-muted small d-block">DESTINO:</span>
+                          <span id="ctxDestino" class="fw-semibold text-dark">-</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                          <span class="text-muted small d-block">PERÍODO:</span>
+                          <span id="ctxFechas" class="fw-semibold text-secondary">-</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="seccion-card">
+                    <div class="seccion-header"><i class="bi bi-receipt"></i> Comprobación de gastos e informe de comisión</div>
+                    <div class="row g-2 g-md-3">
+                      <div class="col-12 col-md-4">
+                        <label class="form-label">Fecha de elaboración del informe</label>
+                        <input type="date" id="fechaElaboracion" class="form-control" onchange="evaluarCampo(this)">
+                      </div>
+                      <div class="col-12 col-md-4">
+                        <label class="form-label">No. de factura (si aplica)</label>
+                        <input type="text" id="factura" class="form-control" placeholder="Ej. 54635463">
+                      </div>
+                      <div class="col-12 col-md-4">
+                        <label class="form-label">Fecha de la factura</label>
+                        <input type="date" id="fechaFactura" class="form-control" onchange="evaluarCampo(this)">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="barra-acciones-footer mt-3">
+                <div class="row g-2 align-items-center">
+                  <div class="col-12 col-lg-7">
+                    <label class="form-label text-dark mb-1"><i class="bi bi-file-earmark-pdf me-1"></i>Documento a generar:</label>
+                    <select id="tipoDocumento" class="form-select"></select>
+                  </div>
+                  <div class="col-12 col-lg-5 d-flex justify-content-lg-end gap-2 align-items-end pt-lg-3">
+                    <button type="button" class="btn btn-outline-secondary px-3" onclick="limpiarFormulario()">
+                      <i class="bi bi-eraser me-1"></i> Limpiar
+                    </button>
+                    <button type="button" id="btnEjecutar" class="btn btn-guinda flex-grow-1 flex-lg-grow-0" onclick="guardarYProcesar()">
+                      <i class="bi bi-printer-fill me-1"></i> Procesar y descargar PDF
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: CATÁLOGOS -->
+        <div id="seccionCatalogos" class="app-sub-section d-none">
+          <div class="main-card p-3 p-md-4">
+            <h5 class="fw-bold mb-3" style="color: var(--issste-verde);"><i class="bi bi-card-list me-2"></i>Gestión de catálogos institucionales</h5>
+            <ul class="nav nav-tabs-custom mb-3" role="tablist">
+              <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-cat-camilleros" type="button">
+                  <i class="bi bi-person-badge me-1"></i> Personal de camillería
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cat-hospitales" type="button">
+                  <i class="bi bi-hospital me-1"></i> Hospitales y destinos
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane fade show active" id="tab-cat-camilleros">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted small">Personal registrado</span>
+                  <button type="button" class="btn btn-sm btn-guinda" onclick="abrirModalCamillero(null)">
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo camillero
+                  </button>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle" id="tablaCatCamilleros" style="font-size: 0.88rem;">
+                    <thead class="table-light">
+                      <tr><th>Nombre completo</th><th>Cargo</th><th>No. empleado</th><th>RFC</th><th class="text-center">Acciones</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="tab-cat-hospitales">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted small">Destinos registrados</span>
+                  <button type="button" class="btn btn-sm btn-guinda" onclick="abrirModalHospital(null)">
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo hospital / destino
+                  </button>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle" id="tablaCatHospitales" style="font-size: 0.88rem;">
+                    <thead class="table-light">
+                      <tr><th>Hospital receptor</th><th>Ciudad / Entidad</th><th class="text-center">Acciones</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: MI PERFIL -->
+        <div id="seccionPerfil" class="app-sub-section d-none">
+          <div class="main-card p-3 p-md-4">
+            <h5 class="fw-bold mb-3" style="color: var(--issste-verde);"><i class="bi bi-person-gear me-2"></i>Mi perfil</h5>
+            <form onsubmit="actualizarMiPerfil(event)" style="max-width: 500px;">
+              <div class="mb-3">
+                <label class="form-label">Nueva contraseña (mínimo 8 caracteres)</label>
+                <input type="password" id="perfNueva" class="form-control" minlength="8" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Confirmar nueva contraseña</label>
+                <input type="password" id="perfConfirmar" class="form-control" minlength="8" required>
+              </div>
+              <button type="submit" class="btn btn-guinda">Actualizar contraseña</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 4: USUARIOS -->
+        <div id="seccionGestionarUsuarios" class="app-sub-section d-none">
+          <div class="main-card p-3 p-md-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <h5 class="fw-bold m-0" style="color: var(--issste-verde);"><i class="bi bi-people me-2"></i>Gestión de usuarios</h5>
+              <button class="btn btn-sm btn-outline-dark" onclick="cargarUsuariosAdmin()">Actualizar lista</button>
+            </div>
+            <div class="alert alert-info small mb-3">
+              <strong>Alta rápida sin límite de correos:</strong> crea primero el acceso en Supabase (<em>Authentication → Users → Add user</em> con <em>Auto Confirm User</em> activado), copia el <strong>UID</strong> y regístralo aquí abajo para asignarle su rol.
+            </div>
+            <form onsubmit="asignarPerfilUsuarioAdmin(event)" class="row g-2 mb-4 p-3 bg-light rounded border">
+              <div class="col-12 col-md-3">
+                <label class="form-label">UID de Supabase</label>
+                <input type="text" id="usrUid" class="form-control form-control-sm" style="text-transform:none;" required placeholder="Pegar UID...">
+              </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" id="usrNombre" class="form-control form-control-sm" style="text-transform:none;" required>
+              </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" id="usrEmail" class="form-control form-control-sm" required>
+              </div>
+              <div class="col-8 col-md-2">
+                <label class="form-label">Rol</label>
+                <select id="usrRol" class="form-select form-select-sm" required>
+                  <option value="Fase 1 (Salida)">Fase 1 (Salida)</option>
+                  <option value="Fase 2 (Cierre)">Fase 2 (Cierre)</option>
+                  <option value="Consulta">Consulta</option>
+                  <option value="Admin">Admin</option>
+                </select>
+              </div>
+              <div class="col-4 col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-sm btn-guinda w-100">Guardar</button>
+              </div>
+            </form>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle" id="tablaUsuariosAdmin" style="font-size: 0.88rem;">
+                <thead class="table-light">
+                  <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th>Acciones</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 5: BITÁCORA FORENSE -->
+        <div id="seccionTrazabilidad" class="app-sub-section d-none">
+          <div class="main-card p-3 p-md-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <h5 class="fw-bold m-0" style="color: var(--issste-verde);"><i class="bi bi-shield-check me-2"></i>Bitácora forense de auditoría</h5>
+              <div class="d-flex gap-2">
+                <input type="text" id="inputBuscarBitacora" class="form-control form-control-sm" placeholder="Buscar folio, usuario o acción...">
+                <button class="btn btn-sm btn-dark" onclick="cargarTrazabilidad()"><i class="bi bi-search"></i></button>
+              </div>
+            </div>
+            <div class="table-responsive" style="max-height: 520px;">
+              <table class="table table-hover align-middle mb-0" id="tablaTrazabilidad" style="font-size: 0.85rem;">
+                <thead class="table-dark sticky-top">
+                  <tr><th>Fecha / Hora</th><th>Folio</th><th>Usuario responsable</th><th class="text-center">Acción</th><th>Detalle</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 6: RESPALDOS Y MIGRACIÓN -->
+        <div id="seccionRespaldos" class="app-sub-section d-none">
+          <div class="main-card p-3 p-md-4">
+            <h5 class="fw-bold mb-3" style="color: var(--issste-verde);"><i class="bi bi-cloud-arrow-down me-2"></i>Respaldos y migración inicial</h5>
+            <div class="seccion-card">
+              <div class="seccion-header"><i class="bi bi-file-earmark-excel"></i> 1. Descargar respaldo de seguridad (recomendado cada semana)</div>
+              <p class="small text-muted">El plan gratuito de Supabase no hace copias automáticas diarias. Descarga aquí tu copia completa compatible con Excel y guárdala en tu Google Drive.</p>
+              <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-guinda" onclick="exportarTablaCSV('comisiones')"><i class="bi bi-download me-1"></i> Descargar comisiones (.csv)</button>
+                <button class="btn btn-outline-dark" onclick="exportarTablaCSV('trazabilidad')"><i class="bi bi-download me-1"></i> Descargar bitácora (.csv)</button>
+                <button class="btn btn-outline-dark" onclick="exportarTablaCSV('camilleros')"><i class="bi bi-download me-1"></i> Descargar camilleros (.csv)</button>
+                <button class="btn btn-outline-dark" onclick="exportarTablaCSV('hospitales')"><i class="bi bi-download me-1"></i> Descargar hospitales (.csv)</button>
+              </div>
+            </div>
+            <div class="seccion-card">
+              <div class="seccion-header"><i class="bi bi-upload"></i> 2. Importación única desde tus archivos de Google Sheets (.csv)</div>
+              <p class="small text-muted">Carga tus archivos descargados de Google Sheets en este orden: primero <b>camilleros.csv</b> (importa camilleros y hospitales) y después <b>BD.csv</b>.</p>
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Archivo de catálogos (camilleros.csv)</label>
+                  <input type="file" id="csvCamillerosFile" accept=".csv" class="form-control mb-2">
+                  <button class="btn btn-sm btn-dark" onclick="importarCsvCamilleros()">Importar camilleros y hospitales</button>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Archivo histórico de traslados (BD.csv)</label>
+                  <input type="file" id="csvBdFile" accept=".csv" class="form-control mb-2">
+                  <button class="btn btn-sm btn-dark" onclick="importarCsvBD()">Importar traslados históricos</button>
+                </div>
+              </div>
+              <div id="logImportacion" class="mt-3 small font-monospace bg-light p-2 rounded border d-none"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODALES -->
+  <div class="modal fade" id="modalResultadosBusqueda" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 10px; overflow: hidden;">
+        <div class="modal-header text-white d-flex justify-content-between align-items-center" style="background-color: var(--issste-verde); padding: 14px 20px;">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-list-check fs-5 text-warning"></i>
+            <h6 class="modal-title m-0 fw-bold">Seleccione el traslado correspondiente</h6>
+          </div>
+          <span id="badgeTotalResultados" class="badge bg-light text-dark fw-bold"></span>
+        </div>
+        <div class="modal-body p-0">
+          <div class="table-responsive" style="max-height: 460px;">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
+              <thead class="table-light sticky-top">
+                <tr><th class="ps-3">No. de oficio</th><th>Fecha traslado</th><th>Paciente</th><th>Camillero</th><th>Hospital destino</th><th class="text-center">Estatus</th><th class="text-center pe-3">Acción</th></tr>
+              </thead>
+              <tbody id="tablaResultadosCuerpo"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer p-2 bg-light">
+          <button type="button" class="btn btn-sm btn-secondary px-3" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalEdicionCamillero" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-dark text-white">
+          <h6 class="modal-title m-0 fw-bold" id="modalCamilleroTitulo">Registrar camillero</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form onsubmit="guardarCamilleroAdmin(event)" class="modal-body p-3">
+          <input type="hidden" id="catCamId" value="">
+          <div class="mb-2"><label class="form-label">Nombre completo</label><input type="text" id="catCamNombre" class="form-control" required></div>
+          <div class="mb-2"><label class="form-label">Cargo</label><input type="text" id="catCamCargo" class="form-control" required value="CAMILLERO"></div>
+          <div class="mb-2"><label class="form-label">Número de empleado</label><input type="text" id="catCamNumEmp" class="form-control" required></div>
+          <div class="mb-3"><label class="form-label">RFC institucional</label><input type="text" id="catCamRfc" class="form-control" required></div>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-sm btn-guinda">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalEdicionHospital" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-dark text-white">
+          <h6 class="modal-title m-0 fw-bold" id="modalHospitalTitulo">Registrar destino / hospital</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form onsubmit="guardarHospitalAdmin(event)" class="modal-body p-3">
+          <input type="hidden" id="catHospId" value="">
+          <div class="mb-2"><label class="form-label">Hospital receptor</label><input type="text" id="catHospNombre" class="form-control" required></div>
+          <div class="mb-3"><label class="form-label">Ciudad / Entidad federativa</label><input type="text" id="catHospCiudad" class="form-control" required></div>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-sm btn-guinda">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title"><i class="bi bi-check-circle-fill me-2"></i>Operación completada</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center p-4">
+          <p id="modalMensaje" class="fs-6 mb-3"></p>
+          <div id="modalBotonera"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalSesionExpirada" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+      <div class="modal-content border-0 shadow-lg text-center p-3">
+        <div class="modal-body p-4">
+          <div class="mb-3 text-warning"><i class="bi bi-shield-lock" style="font-size: 3rem;"></i></div>
+          <h5 class="fw-bold mb-2 text-dark">Sesión cerrada por inactividad</h5>
+          <p class="text-muted small mb-4">Por motivos de seguridad y confidencialidad médica, la sesión se cerró tras 30 minutos sin actividad.</p>
+          <button type="button" class="btn btn-guinda w-100 py-2 fw-semibold" onclick="redirigirALoginExpirado()">Volver a iniciar sesión</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.12/build/pdfmake.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.12/build/vfs_fonts.js"></script>
+  <script src="pdf.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
