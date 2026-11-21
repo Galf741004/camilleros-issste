@@ -229,7 +229,6 @@ async function generarYDescargarPDF(d, tipoDocumento) {
     content.push({ text: '', pageBreak: 'before' });
     content.push(...construirPaginaReversoAnexo7(d));
   } else {
-    // PÁGINA 1: OFICIO COORDINACIÓN DE ENFERMERÍA
     content.push(bloqueEncabezadoLogos(logos));
     content.push({
       text: `HOSPITAL REGIONAL LEÓN\nSubdirección Médica\nCoordinación de Enfermería\n\nOFICIO No. ${d.num_oficio}\n\nLeón, Guanajuato, a ${d.fecha_oficio_texto}\n\nAsunto: traslado de paciente`,
@@ -244,15 +243,12 @@ async function generarYDescargarPDF(d, tipoDocumento) {
     content.push({ text: 'Con copia:\n-Minutario.', fontSize: 8.5, margin: [0, 0, 0, 40] });
     content.push(bloquePieLogos(logos));
 
-    // PÁGINA 2: ANEXO 7
     content.push({ text: '', pageBreak: 'before' });
     content.push(...construirPaginaAnexo7(d, ini, fin, logos, true));
 
-    // PÁGINA 3: REVERSO ANEXO 7
     content.push({ text: '', pageBreak: 'before' });
     content.push(...construirPaginaReversoAnexo7(d));
 
-    // PÁGINA 4: OFICIO DE COMISIÓN
     content.push({ text: '', pageBreak: 'before' });
     content.push(bloqueEncabezadoLogos(logos));
     content.push({ text: 'OFICIO DE COMISIÓN', alignment: 'center', bold: true, fontSize: 11, margin: [0, 2, 0, 8] });
@@ -281,7 +277,6 @@ async function generarYDescargarPDF(d, tipoDocumento) {
     content.push({ text: 'ATENTAMENTE\n\n\nDR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL LEÓN', alignment: 'center', bold: true, fontSize: 9.5, margin: [0, 0, 0, 24] });
     content.push(bloquePieLogos(logos));
 
-    // PÁGINA 5: AVISO DE COMISIÓN / ORDEN DE MINISTRACIÓN
     content.push({ text: '', pageBreak: 'before' });
     content.push(bloqueEncabezadoLogos(logos));
     content.push({ text: 'Aviso de Comisión / Orden de Ministración de Viáticos y Pasajes', alignment: 'center', bold: true, fontSize: 10.5, margin: [0, 0, 0, 4] });
@@ -308,4 +303,148 @@ async function generarYDescargarPDF(d, tipoDocumento) {
           [
             { text: 'Destino', rowSpan: 3, bold: true, fontSize: 8, alignment: 'center' },
             { text: 'Período', colSpan: 6, bold: true, fontSize: 8, alignment: 'center' }, {}, {}, {}, {}, {},
-            {
+            { text: 'Nº de Días', rowSpan: 3, bold: true, fontSize: 7.5, alignment: 'center' },
+            { text: 'Cuota por Día', rowSpan: 3, bold: true, fontSize: 7.5, alignment: 'center' },
+            { text: 'Importe de Viáticos', rowSpan: 3, bold: true, fontSize: 7.5, alignment: 'center' }
+          ],
+          [
+            {},
+            { text: 'Fecha de Inicio', colSpan: 3, fontSize: 7.5, alignment: 'center' }, {}, {},
+            { text: 'Fecha de Término', colSpan: 3, fontSize: 7.5, alignment: 'center' }, {}, {},
+            {}, {}, {}
+          ],
+          [
+            {},
+            { text: 'Día', fontSize: 7, alignment: 'center' }, { text: 'Mes', fontSize: 7, alignment: 'center' }, { text: 'Año', fontSize: 7, alignment: 'center' },
+            { text: 'Día', fontSize: 7, alignment: 'center' }, { text: 'Mes', fontSize: 7, alignment: 'center' }, { text: 'Año', fontSize: 7, alignment: 'center' },
+            {}, {}, {}
+          ],
+          [
+            { text: `${d.hospital}, ${d.ciudad}`, fontSize: 7.5, alignment: 'center' },
+            { text: `${ini.d1}${ini.d2}`, fontSize: 8, alignment: 'center' },
+            { text: `${ini.m1}${ini.m2}`, fontSize: 8, alignment: 'center' },
+            { text: `${ini.a1}${ini.a2}`, fontSize: 8, alignment: 'center' },
+            { text: `${fin.d1}${fin.d2}`, fontSize: 8, alignment: 'center' },
+            { text: `${fin.m1}${fin.m2}`, fontSize: 8, alignment: 'center' },
+            { text: `${fin.a1}${fin.a2}`, fontSize: 8, alignment: 'center' },
+            { text: '1', fontSize: 8, alignment: 'center' },
+            { text: '$ 490.00', fontSize: 8, alignment: 'center' },
+            { text: '$ 490.00', fontSize: 8, alignment: 'center' }
+          ]
+        ]
+      },
+      margin: [0, 0, 0, 6]
+    });
+    content.push({ text: 'Tipo de Viáticos:   Anticipados [ X ]    Devengados [   ]    TOTAL: $ 490.00', fontSize: 8.5, margin: [0, 0, 0, 4] });
+    content.push({ text: 'Importe Total con letra:   CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', bold: true, fontSize: 8.5, margin: [0, 0, 0, 6] });
+    content.push({ text: 'PASAJES:   Avión [   ]   Autobús [   ]   Automóvil Institucional [   ]   Otros Especificar [   ]   MONTO: [          ]', fontSize: 8, margin: [0, 0, 0, 4] });
+    content.push({ text: 'Importe Total con letra:   CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', fontSize: 8, margin: [0, 0, 0, 4] });
+    content.push({ text: 'Nº de Tarjeta: _____________________   Clave de Banco: _____________________', fontSize: 8, margin: [0, 0, 0, 8] });
+    content.push({ text: 'IV. Objeto de la Comisión detallando el propósito de la misma:', bold: true, fontSize: 8.5, margin: [0, 0, 0, 2] });
+    content.push({
+      table: {
+        widths: ['*'],
+        body: [[{ text: `ACUDIR AL TRASLADO DEL PACIENTE ${d.paciente_nombre} AL ${d.hospital}, ${d.ciudad}.`, fontSize: 8, margin: [4, 4, 4, 4] }]]
+      },
+      margin: [0, 0, 0, 8]
+    });
+    content.push({ text: 'V. Monto por Partida Presupuestal', bold: true, fontSize: 8.5 });
+    content.push({ text: 'Para Viáticos: $ 490.00   |   Para Pasajes: $ -   |   Monto total de la Comisión: $ 490.00\nImporte con letra: CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', fontSize: 8.5, margin: [12, 2, 0, 14] });
+    content.push(bloqueFirmasConLinea(
+      `${d.camillero_nombre}\nCAMILLERO`, 'Nombre y Cargo del Comisionado',
+      'DR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL LEÓN', 'Nombre y Cargo del Responsable del Fondo', 12
+    ));
+
+    content.push({ text: '', pageBreak: 'before' });
+    content.push(bloqueEncabezadoLogos(logos));
+    content.push({ text: 'DIRECCIÓN DE ADMINISTRACIÓN Y FINANZAS\nSUBDIRECCIÓN DE PROGRAMACIÓN Y PRESUPUESTO\nDESGLOSE PORMENORIZADO DE GASTOS', alignment: 'center', bold: true, fontSize: 9.5, margin: [0, 0, 0, 4] });
+    content.push({ text: `Oficio de comisión No. ${d.num_oficio}`, alignment: 'right', bold: true, fontSize: 9, margin: [0, 0, 0, 4] });
+    content.push({
+      text: `UNIDAD EJECUTORA DEL GASTO: HOSPITAL REGIONAL LEÓN\nCOMISIONADO: ${d.camillero_nombre}\nDESTINO DE LA COMISIÓN: ${d.hospital}, ${d.ciudad}\nPERÍODO DE LA COMISIÓN: ${d.intervalo_fechas}`,
+      fontSize: 8.5, bold: true, margin: [0, 0, 0, 6]
+    });
+    content.push({ text: 'GASTOS CON COMPROBANTE', bold: true, fontSize: 8.5, margin: [0, 0, 0, 2] });
+    content.push({
+      table: {
+        widths: ['26%', '20%', '36%', '18%'],
+        heights: [14, 14, 12, 12, 12, 12, 12, 14],
+        body: [
+          [{ text: 'FECHA', bold: true, alignment: 'center' }, { text: 'NO. DE DOCUMENTO', bold: true, alignment: 'center' }, { text: 'DESCRIPCIÓN', bold: true, alignment: 'center' }, { text: 'IMPORTE', bold: true, alignment: 'center' }],
+          [{ text: d.fecha_inicio_texto || d.fecha_oficio_texto, alignment: 'center' }, { text: 'S/FACTURA', alignment: 'center' }, { text: 'SIN COMPROBACIÓN', alignment: 'center' }, { text: '0.00', alignment: 'right' }],
+          [' ', ' ', ' ', ' '], [' ', ' ', ' ', ' '], [' ', ' ', ' ', ' '], [' ', ' ', ' ', ' '], [' ', ' ', ' ', ' '],
+          [{ text: 'TOTAL', colSpan: 3, bold: true, alignment: 'center' }, {}, {}, { text: '0.00', bold: true, alignment: 'right' }]
+        ]
+      },
+      fontSize: 7.8, margin: [0, 0, 0, 8]
+    });
+    content.push({ text: 'GASTOS SIN COMPROBANTE', bold: true, fontSize: 8.5, margin: [0, 0, 0, 2] });
+    content.push({
+      table: {
+        widths: ['28%', '54%', '18%'],
+        heights: [14, 14, 12, 12, 14],
+        body: [
+          [{ text: 'FECHA', bold: true, alignment: 'center' }, { text: 'DESCRIPCIÓN', bold: true, alignment: 'center' }, { text: 'IMPORTE', bold: true, alignment: 'center' }],
+          [{ text: d.fecha_inicio_texto || d.fecha_oficio_texto, alignment: 'center' }, { text: 'SIN COMPROBACIÓN', alignment: 'center' }, { text: '490.00', alignment: 'right' }],
+          [' ', ' ', ' '], [' ', ' ', ' '],
+          [{ text: 'TOTAL', colSpan: 2, bold: true, alignment: 'center' }, {}, { text: '490.00', bold: true, alignment: 'right' }]
+        ]
+      },
+      fontSize: 7.8, margin: [0, 0, 0, 6]
+    });
+    content.push({ text: 'TOTAL COMPROBADO:   $ 490.00', alignment: 'right', bold: true, fontSize: 9, margin: [0, 0, 0, 10] });
+    content.push(bloqueFirmasConLinea(
+      `${d.camillero_nombre}\nCAMILLERO`, 'Nombre y Cargo del Comisionado',
+      'DR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL ISSSTE LEÓN', 'Nombre y cargo del Responsable del Fondo', 12
+    ));
+    content.push({ text: 'DECLARO BAJO PROTESTA DE DECIR LA VERDAD QUE LOS IMPORTES REGISTRADOS EN EL PRESENTE DOCUMENTO FUERON EFECTIVAMENTE EROGADOS DURANTE EL PERÍODO DE LA COMISIÓN Y BAJO MI RESPONSABILIDAD MANIFIESTO DE CONFORMIDAD A LO ESTABLECIDO POR LA LEY GENERAL DE RESPONSABILIDADES ADMINISTRATIVAS.', alignment: 'center', fontSize: 7.5, margin: [0, 10, 0, 6] });
+    content.push({ text: 'EN CASO NECESARIO UTILIZAR OTRO FORMATO                                   HOJA _____ DE _____.', fontSize: 7.5 });
+
+    content.push({ text: '', pageBreak: 'before' });
+    content.push(bloqueEncabezadoLogos(logos));
+    content.push({ text: 'INFORME DE LA COMISIÓN', alignment: 'center', bold: true, fontSize: 10.5, margin: [0, 0, 0, 6] });
+    content.push({
+      text: `Oficio de comisión No.  ${d.num_oficio}\nUnidad Ejecutora del Gasto: HOSPITAL REGIONAL LEÓN\nFecha:  ${d.fecha_elaboracion_texto || d.fecha_fin_texto || d.fecha_oficio_texto}`,
+      alignment: 'right', bold: true, fontSize: 8.5, margin: [0, 0, 0, 8]
+    });
+    content.push({ text: `LUGAR DE LA COMISIÓN:   ${d.hospital}, ${d.ciudad}\nPERIODO DE LA COMISIÓN:   ${d.intervalo_fechas}`, bold: true, fontSize: 8.5, margin: [0, 0, 0, 12] });
+    content.push(bloqueFirmasConLinea(
+      d.camillero_nombre, 'NOMBRE DEL COMISIONADO',
+      'CAMILLERO', 'CARGO DEL COMISIONADO', 4
+    ));
+    content.push({ text: '490.00\n_____________________\nIMPORTE ASIGNADO', alignment: 'center', fontSize: 8.5, bold: true, margin: [0, 8, 0, 8] });
+
+    const bloquesInforme = [
+      ['1. OBJETIVO DE LA COMISIÓN', 'ACUDIR A TRASLADO DE PACIENTE'],
+      ['2. RESUMEN DE LAS ACTIVIDADES REALIZADAS:', 'SE TRASLADA A PACIENTE EN AMBULANCIA DE ESTE HOSPITAL A LA UNIDAD DE REFERENCIA'],
+      ['3. CONCLUSIONES:', 'SE RECIBE EXITOSAMENTE AL PACIENTE'],
+      ['4. RESULTADOS OBTENIDOS:', 'EL PACIENTE SE QUEDA EN LA UNIDAD DE REFERENCIA'],
+      ['5. CONTRIBUCIONES AL INSTITUTO POR LA COMISIÓN:', 'AL TRASLADAR AL PACIENTE A OTRA UNIDAD DE REFERENCIA PARA SU TRATAMIENTO OPORTUNO, SE CONTRIBUYE A SU RECUPERACIÓN.'],
+      ['6. OBSERVACIONES Y RECOMENDACIONES:', 'NINGUNA']
+    ];
+    bloquesInforme.forEach(([tit, txt]) => {
+      content.push({ text: tit, bold: true, fontSize: 8.5, margin: [0, 3, 0, 2] });
+      content.push({
+        table: { widths: ['*'], body: [[{ text: txt, fontSize: 8, margin: [6, 3, 6, 3], border: [true, true, true, true] }]] },
+        layout: { vLineWidth: () => 2.5, hLineWidth: () => 0.5 },
+        margin: [0, 0, 0, 3]
+      });
+    });
+
+    content.push(bloqueFirmasConLinea(
+      `${d.camillero_nombre}\nCAMILLERO`, 'Nombre y Cargo del Comisionado',
+      'DR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL ISSSTE LEÓN', 'Nombre y Cargo del Titular de la Unidad Administrativa', 14
+    ));
+    content.push({ text: 'DECLARO BAJO PROTESTA DE DECIR LA VERDAD, QUE LOS DATOS CONTENIDOS EN EL PRESENTE DOCUMENTO SON VERÍDICOS, CONCIENTE DE LAS SANCIONES A QUE ME HAGO ACREEDOR EN CASO CONTRARIO.', alignment: 'center', fontSize: 7.5, margin: [0, 8, 0, 0] });
+  }
+
+  const folioSeguro = String(d.num_oficio || 'SIN_FOLIO').replace(/\//g, '_');
+  const sufijo = tipoDocumento === 'SOLO_VIATICOS' ? 'Solicitud_Viaticos' : 'Expediente_Completo';
+  const nombreArchivo = `Comision_${folioSeguro}_${d.camillero_nombre}_${sufijo}.pdf`;
+
+  pdfMake.createPdf({
+    pageSize: 'LETTER',
+    pageMargins: [38, 22, 38, 22],
+    content: content
+  }).download(nombreArchivo);
+}
+// FIN DEL ARCHIVO PDF.JS
