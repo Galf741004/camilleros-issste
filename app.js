@@ -322,7 +322,7 @@ async function cargarRegistroPorId(id, esCierreRapido) {
   if (error || !data) return alert('No se pudo cargar el registro.');
   llenarFormularioEdicion(data);
   if (esCierreRapido && !data.fecha_elaboracion) {
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = new Date().toLocaleDateString('en-CA');
     document.getElementById('fechaElaboracion').value = hoy;
     evaluarCampo(document.getElementById('fechaElaboracion'));
     document.getElementById('factura').focus();
@@ -599,7 +599,7 @@ function limpiarFormulario() {
     cambiarFase(1);
   }
 
-  const hoy = new Date().toISOString().split('T')[0];
+  const hoy = new Date().toLocaleDateString('en-CA');
   document.getElementById('fechaOficio').value = hoy;
   actualizarTextoFechaOficio();
   document.getElementById('numOficio').value = sugerenciaOficioGlobal || '';
