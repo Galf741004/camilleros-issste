@@ -208,6 +208,11 @@ async function cargarCatalogosServidor() {
     sb.rpc('obtener_siguiente_folio_sugerido')
   ]);
 
+  if (resCam.error || resHosp.error || resPend.error || resConc.error || resFolio.error) {
+    alert('No se pudieron cargar los datos del servidor. Revisa tu conexión a Internet y recarga la página.');
+    return;
+  }
+
   personal = resCam.data || [];
   destinos = resHosp.data || [];
   pendientesGlobal = resPend.data || [];
@@ -239,7 +244,10 @@ async function cargarCatalogosServidor() {
 
   document.getElementById('kpiPendientesCount').textContent = pendientesGlobal.length;
   document.getElementById('kpiConcluidosCount').textContent = concluidosGlobal.length;
-  const maxNum = [...pendientesGlobal, ...concluidosGlobal].reduce((m, r) => Math.max(m, r.consecutivo || 0), 0);
+  const anioActual = new Date().getFullYear();
+  const maxNum = [...pendientesGlobal, ...concluidosGlobal]
+    .filter(r => r.anio === anioActual)
+    .reduce((m, r) => Math.max(m, r.consecutivo || 0), 0);
   document.getElementById('kpiUltimoFolio').textContent = maxNum ? `${maxNum}-T` : '-';
 
   actualizarTablerosFase2UI();
@@ -330,27 +338,31 @@ async function cargarRegistroPorId(id, esCierreRapido) {
 }
 
 async function ejecutarBusquedaUniversal() {
-  const crit = document.getElementById('inputBuscar').value.trim().toUpperCase();
+  const critRaw = document.getElementById('inputBuscar').value.trim().toUpperCase();
+  const crit = critRaw.replace(/[,()]/g, ' ').trim();
   const filtro = document.getElementById('filtroEstadoBusqueda').value;
   const btn = document.getElementById('btnBuscar');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
   try {
-    let query = sb.from('comisiones').select('*').order('id', { ascending: false }).limit(200);
-    if (!crit) {
+    let query;
+    if (crit) {
+      const patron = `%${crit}%`;
+      query = sb.from('comisiones')
+        .select('*')
+        .or(`num_oficio.ilike.${patron},num_empleado.ilike.${patron},rfc_camillero.ilike.${patron},camillero_nombre.ilike.${patron},paciente_nombre.ilike.${patron},cedula.ilike.${patron}`)
+        .order('id', { ascending: false })
+        .limit(100);
+    } else {
+      query = sb.from('comisiones').select('*').order('id', { ascending: false }).limit(200);
       if (filtro === 'SOLO_PENDIENTES') query = query.is('fecha_elaboracion', null);
       if (filtro === 'SOLO_CONCLUIDOS') query = query.not('fecha_elaboracion', 'is', null);
     }
     const { data, error } = await query;
     if (error) throw error;
 
-    const resultados = (data || []).filter(r => {
-      if (!crit) return true;
-      return [r.num_oficio, r.num_empleado, r.rfc_camillero, r.camillero_nombre, r.paciente_nombre, r.cedula]
-        .some(v => String(v || '').toUpperCase().includes(crit));
-    });
-
+    const resultados = data || [];
     if (resultados.length === 0) {
       alert('No se encontraron traslados con el criterio ingresado.');
       return;
@@ -411,16 +423,20 @@ function llenarFormularioEdicion(res) {
   const esConsulta = currentUser.role === 'Consulta';
 
   const btnEjecutar = document.getElementById('btnEjecutar');
+  const btnReimpInf = document.getElementById('btnReimprimirInferior');
+
   if (esConsulta || esFase1) {
     new bootstrap.Tab(document.getElementById(esFase1 ? 'tab-salida' : 'tab-regreso')).show();
     cambiarFase(esFase1 ? 1 : 2);
     bloquearCamposPorRol(false, false, esFase1, esConsulta);
     btnEjecutar.classList.add('d-none');
+    btnReimpInf.classList.remove('d-none');
   } else {
     new bootstrap.Tab(document.getElementById('tab-regreso')).show();
     cambiarFase(2);
     bloquearCamposPorRol(esAdmin, esFase2, false, false);
     btnEjecutar.classList.remove('d-none');
+    btnReimpInf.classList.add('d-none');
   }
 
   document.getElementById('registroId').value = res.id;
@@ -480,12 +496,21 @@ async function reimprimirActual() {
 
 async function guardarYProcesar() {
   const idExistente = document.getElementById('registroId').value;
+  const tipoDoc = document.getElementById('tipoDocumento').value;
+  const fElab = document.getElementById('fechaElaboracion').value || null;
+
   if (!idExistente) {
     const form = document.getElementById('formComision');
     if (!form.checkValidity()) { form.reportValidity(); return; }
     const rfcBase = document.getElementById('rfcPacienteBase').value.trim();
     if (rfcBase && !validarEstructuraRfc10(rfcBase).valido) {
       alert('El RFC del paciente tiene un formato incorrecto.');
+      return;
+    }
+  } else if ((currentUser.role === 'Fase 2 (Cierre)' && tipoDoc !== 'SOLO_GUARDAR') || tipoDoc === 'COMPLETO') {
+    if (!fElab) {
+      alert('Para cerrar el expediente debes indicar la Fecha de elaboración del informe.');
+      document.getElementById('fechaElaboracion').focus();
       return;
     }
   }
@@ -495,11 +520,9 @@ async function guardarYProcesar() {
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
 
   try {
-    const tipoDoc = document.getElementById('tipoDocumento').value;
     const fIni = document.getElementById('fechaInicio').value;
     const fFin = document.getElementById('fechaFin').value;
     const fOfi = document.getElementById('fechaOficio').value;
-    const fElab = document.getElementById('fechaElaboracion').value || null;
     const fFact = document.getElementById('fechaFactura').value || null;
     const pacCompleto = `${document.getElementById('pacienteNombres').value} ${document.getElementById('pacientePaterno').value} ${document.getElementById('pacienteMaterno').value}`.replace(/\s+/g, ' ').trim().toUpperCase();
 
@@ -580,6 +603,7 @@ function limpiarFormulario() {
   document.getElementById('registroId').value = '';
   registroSeleccionadoActual = null;
   document.getElementById('btnReimprimirDirecto').classList.add('d-none');
+  document.getElementById('btnReimprimirInferior').classList.add('d-none');
   document.getElementById('bannerContextoActivo').classList.add('d-none');
   document.getElementById('errorRfcBase').classList.add('d-none');
 
