@@ -52,9 +52,9 @@ function bloqueEncabezadoLogos(logos) {
 
 function bloquePieLogos(logos) {
   if (logos.anio2026) {
-    return { image: logos.anio2026, width: 536, margin: [0, 8, 0, 0] };
+    return { image: logos.anio2026, width: 536, absolutePosition: { x: 38, y: 697 } };
   }
-  return { text: '2026 año de Margarita Maza', bold: true, fontSize: 8, color: '#9F2241', margin: [0, 10, 0, 0] };
+  return { text: '2026 año de Margarita Maza', bold: true, fontSize: 8, color: '#9F2241', absolutePosition: { x: 38, y: 745 } };
 }
 
 function bloqueFirmasConLinea(izqNombre, izqCargo, derNombre, derCargo, marginTop) {
@@ -240,7 +240,7 @@ async function generarYDescargarPDF(d, tipoDocumento) {
       fontSize: 10, alignment: 'justify', lineHeight: 1.35, margin: [0, 0, 0, 22]
     });
     content.push({ text: 'A T E N T A M E N T E\n\n\nL.E. ANGELICA TORRES LEÓN\nCOORDINADORA DE ENFERMERÍA', bold: true, fontSize: 9.5, margin: [0, 0, 0, 22] });
-    content.push({ text: 'Con copia:\n-Minutario.', fontSize: 8.5, margin: [0, 0, 0, 40] });
+    content.push({ text: 'Con copia:\n-Minutario.', fontSize: 8.5, margin: [0, 0, 0, 10] });
     content.push(bloquePieLogos(logos));
 
     content.push({ text: '', pageBreak: 'before' });
@@ -272,9 +272,9 @@ async function generarYDescargarPDF(d, tipoDocumento) {
     });
     content.push({
       text: 'Por lo anterior, lo instruyo para que se presente en la Coordinación Administrativa (u homólogo) con el presente documento para el otorgamiento de viáticos y pasajes.\n\nLa comprobación de viáticos deberá ser entregada en UN PLAZO MÁXIMO DE 3 DÍAS HÁBILES, a partir de la conclusión de la comisión.\n\nSin otro particular, reciba un cordial saludo.',
-      fontSize: 9.5, lineHeight: 1.3, margin: [0, 0, 0, 22]
+      fontSize: 9.5, lineHeight: 1.3, margin: [0, 0, 0, 24]
     });
-    content.push({ text: 'ATENTAMENTE\n\n\nDR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL LEÓN', alignment: 'center', bold: true, fontSize: 9.5, margin: [0, 0, 0, 24] });
+    content.push({ text: 'ATENTAMENTE\n\n\nDR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL LEÓN', alignment: 'center', bold: true, fontSize: 9.5, margin: [0, 0, 0, 10] });
     content.push(bloquePieLogos(logos));
 
     content.push({ text: '', pageBreak: 'before' });
@@ -337,7 +337,7 @@ async function generarYDescargarPDF(d, tipoDocumento) {
     });
     content.push({ text: 'Tipo de Viáticos:   Anticipados [ X ]    Devengados [   ]    TOTAL: $ 490.00', fontSize: 8.5, margin: [0, 0, 0, 4] });
     content.push({ text: 'Importe Total con letra:   CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', bold: true, fontSize: 8.5, margin: [0, 0, 0, 6] });
-    content.push({ text: 'PASAJES:   Avión [   ]   Autobús [   ]   Automóvil Institucional [   ]   Otros Especificar [   ]   MONTO: [          ]', fontSize: 8, margin: [0, 0, 0, 4] });
+    content.push({ text: 'PASAJES:   Avión [   ]   Autobús [   ]   Automóvil Institucional [   ]   Otros Especificar [   ]   MONTO: ____________', fontSize: 8, margin: [0, 0, 0, 4] });
     content.push({ text: 'Importe Total con letra:   CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', fontSize: 8, margin: [0, 0, 0, 4] });
     content.push({ text: 'Nº de Tarjeta: _____________________   Clave de Banco: _____________________', fontSize: 8, margin: [0, 0, 0, 8] });
     content.push({ text: 'IV. Objeto de la Comisión detallando el propósito de la misma:', bold: true, fontSize: 8.5, margin: [0, 0, 0, 2] });
@@ -367,11 +367,11 @@ async function generarYDescargarPDF(d, tipoDocumento) {
     content.push({
       table: {
         widths: ['26%', '20%', '36%', '18%'],
-        heights: [14, 14, 12, 12, 12, 12, 12, 14],
+        heights: [14, 14, 13, 13, 13, 13, 13, 13, 13, 13, 14],
         body: [
           [{ text: 'FECHA', bold: true, alignment: 'center' }, { text: 'NO. DE DOCUMENTO', bold: true, alignment: 'center' }, { text: 'DESCRIPCIÓN', bold: true, alignment: 'center' }, { text: 'IMPORTE', bold: true, alignment: 'center' }],
           [{ text: d.fecha_inicio_texto || d.fecha_oficio_texto, alignment: 'center' }, { text: 'S/FACTURA', alignment: 'center' }, { text: 'SIN COMPROBACIÓN', alignment: 'center' }, { text: '0.00', alignment: 'right' }],
-          [' ', ' ', ' ', ' '], [' ', ' ', ' ', ' '], [' ', ' ', ' ', ' '], [' ', ' ', ' ', ' '], [' ', ' ', ' ', ' '],
+          ...Array.from({ length: 8 }, () => [' ', ' ', ' ', ' ']),
           [{ text: 'TOTAL', colSpan: 3, bold: true, alignment: 'center' }, {}, {}, { text: '0.00', bold: true, alignment: 'right' }]
         ]
       },
@@ -381,11 +381,11 @@ async function generarYDescargarPDF(d, tipoDocumento) {
     content.push({
       table: {
         widths: ['28%', '54%', '18%'],
-        heights: [14, 14, 12, 12, 14],
+        heights: [14, 14, 13, 13, 13, 14],
         body: [
           [{ text: 'FECHA', bold: true, alignment: 'center' }, { text: 'DESCRIPCIÓN', bold: true, alignment: 'center' }, { text: 'IMPORTE', bold: true, alignment: 'center' }],
           [{ text: d.fecha_inicio_texto || d.fecha_oficio_texto, alignment: 'center' }, { text: 'SIN COMPROBACIÓN', alignment: 'center' }, { text: '490.00', alignment: 'right' }],
-          [' ', ' ', ' '], [' ', ' ', ' '],
+          ...Array.from({ length: 3 }, () => [' ', ' ', ' ']),
           [{ text: 'TOTAL', colSpan: 2, bold: true, alignment: 'center' }, {}, { text: '490.00', bold: true, alignment: 'right' }]
         ]
       },
@@ -394,9 +394,9 @@ async function generarYDescargarPDF(d, tipoDocumento) {
     content.push({ text: 'TOTAL COMPROBADO:   $ 490.00', alignment: 'right', bold: true, fontSize: 9, margin: [0, 0, 0, 10] });
     content.push(bloqueFirmasConLinea(
       `${d.camillero_nombre}\nCAMILLERO`, 'Nombre y Cargo del Comisionado',
-      'DR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL ISSSTE LEÓN', 'Nombre y cargo del Responsable del Fondo', 12
+      'DR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL ISSSTE LEÓN', 'Nombre y cargo del Responsable del Fondo', 16
     ));
-    content.push({ text: 'DECLARO BAJO PROTESTA DE DECIR LA VERDAD QUE LOS IMPORTES REGISTRADOS EN EL PRESENTE DOCUMENTO FUERON EFECTIVAMENTE EROGADOS DURANTE EL PERÍODO DE LA COMISIÓN Y BAJO MI RESPONSABILIDAD MANIFIESTO DE CONFORMIDAD A LO ESTABLECIDO POR LA LEY GENERAL DE RESPONSABILIDADES ADMINISTRATIVAS.', alignment: 'center', fontSize: 7.5, margin: [0, 10, 0, 6] });
+    content.push({ text: 'DECLARO BAJO PROTESTA DE DECIR LA VERDAD QUE LOS IMPORTES REGISTRADOS EN EL PRESENTE DOCUMENTO FUERON EFECTIVAMENTE EROGADOS DURANTE EL PERÍODO DE LA COMISIÓN Y BAJO MI RESPONSABILIDAD MANIFIESTO DE CONFORMIDAD A LO ESTABLECIDO POR LA LEY GENERAL DE RESPONSABILIDADES ADMINISTRATIVAS.', alignment: 'center', fontSize: 7.5, margin: [0, 12, 0, 8] });
     content.push({ text: 'EN CASO NECESARIO UTILIZAR OTRO FORMATO                                   HOJA _____ DE _____.', fontSize: 7.5 });
 
     content.push({ text: '', pageBreak: 'before' });
