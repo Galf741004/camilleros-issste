@@ -707,28 +707,47 @@ async function eliminarHospitalAdmin(id) {
   await cargarCatalogosServidor();
 }
 
+let usuariosAdminGlobal = [];
+
 async function asignarPerfilUsuarioAdmin(e) {
   e.preventDefault();
-  const payload = {
-    id: document.getElementById('usrUid').value.trim(),
-    nombre_completo: document.getElementById('usrNombre').value.trim(),
-    email: document.getElementById('usrEmail').value.trim().toLowerCase(),
-    rol: document.getElementById('usrRol').value,
-    estado: 'Activo'
-  };
-  const { error } = await sb.from('perfiles').upsert(payload);
-  if (error) return alert('Error al guardar usuario: ' + error.message);
-  await sb.rpc('registrar_evento_admin', { p_folio: 'N/A', p_accion: 'ALTA_USUARIO', p_detalles: `${payload.email} (${payload.rol})` });
-  alert('Usuario asignado correctamente.');
-  e.target.reset();
-  cargarUsuariosAdmin();
+  const btn = document.getElementById('btnGuardarUsuario');
+  const email = document.getElementById('usrEmail').value.trim().toLowerCase();
+  const nombre = document.getElementById('usrNombre').value.trim();
+  const rol = document.getElementById('usrRol').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+  try {
+    const { error } = await sb.rpc('asignar_perfil_por_correo', {
+      p_email: email,
+      p_nombre: nombre,
+      p_rol: rol
+    });
+    if (error) throw error;
+
+    await sb.rpc('registrar_evento_admin', {
+      p_folio: 'N/A',
+      p_accion: 'ALTA_EDICION_USUARIO',
+      p_detalles: `${email} -> ${rol}`
+    });
+    alert('Usuario guardado correctamente.');
+    e.target.reset();
+    cargarUsuariosAdmin();
+  } catch (err) {
+    alert('No se pudo guardar: ' + (err.message || err));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
+  }
 }
 
 async function cargarUsuariosAdmin() {
   const { data } = await sb.from('perfiles').select('*').order('created_at', { ascending: false });
+  usuariosAdminGlobal = data || [];
   const tbody = document.getElementById('tablaUsuariosAdmin').querySelector('tbody');
   tbody.innerHTML = '';
-  (data || []).forEach(u => {
+  usuariosAdminGlobal.forEach(u => {
     const tr = document.createElement('tr');
     const esYo = u.id === currentUser.id;
     tr.innerHTML = `
@@ -737,14 +756,33 @@ async function cargarUsuariosAdmin() {
       <td>${escapeHTML(u.rol)}</td>
       <td><span class="badge ${u.estado === 'Activo' ? 'bg-success' : 'bg-danger'}">${escapeHTML(u.estado)}</span></td>
       <td><small>${u.ultimo_login ? new Date(u.ultimo_login).toLocaleString('es-MX') : 'Sin ingreso'}</small></td>
-      <td>${!esYo ? `<button class="btn btn-sm btn-outline-warning" onclick="alternarEstadoUsuario('${u.id}','${u.estado}')">${u.estado === 'Activo' ? 'Desactivar' : 'Activar'}</button>` : ''}</td>`;
+      <td class="text-nowrap">${!esYo ? `
+        <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="cargarUsuarioEnFormulario('${u.id}')">Editar</button>
+        <button type="button" class="btn btn-sm btn-outline-warning" onclick="alternarEstadoUsuario('${u.id}','${u.estado}')">${u.estado === 'Activo' ? 'Desactivar' : 'Activar'}</button>
+      ` : '<span class="text-muted small">Tu cuenta</span>'}</td>`;
     tbody.appendChild(tr);
   });
 }
 
+function cargarUsuarioEnFormulario(id) {
+  const u = usuariosAdminGlobal.find(x => x.id === id);
+  if (!u) return;
+  document.getElementById('usrEmail').value = u.email;
+  document.getElementById('usrNombre').value = u.nombre_completo;
+  document.getElementById('usrRol').value = u.rol;
+  document.getElementById('usrEmail').focus();
+}
+
 async function alternarEstadoUsuario(id, estadoActual) {
   const nuevo = estadoActual === 'Activo' ? 'Inactivo' : 'Activo';
-  await sb.from('perfiles').update({ estado: nuevo }).eq('id', id);
+  const { error } = await sb.from('perfiles').update({ estado: nuevo }).eq('id', id);
+  if (error) return alert('Error: ' + error.message);
+  const u = usuariosAdminGlobal.find(x => x.id === id);
+  await sb.rpc('registrar_evento_admin', {
+    p_folio: 'N/A',
+    p_accion: 'ESTADO_USUARIO',
+    p_detalles: `${u ? u.email : id} -> ${nuevo}`
+  });
   cargarUsuariosAdmin();
 }
 
