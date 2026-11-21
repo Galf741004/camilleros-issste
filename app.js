@@ -715,31 +715,36 @@ async function asignarPerfilUsuarioAdmin(e) {
   const email = document.getElementById('usrEmail').value.trim().toLowerCase();
   const nombre = document.getElementById('usrNombre').value.trim();
   const rol = document.getElementById('usrRol').value;
+  const password = document.getElementById('usrPass').value;
 
   btn.disabled = true;
   btn.textContent = 'Guardando...';
   try {
-    const { error } = await sb.rpc('asignar_perfil_por_correo', {
-      p_email: email,
-      p_nombre: nombre,
-      p_rol: rol
+    const { data, error } = await sb.functions.invoke('admin-usuarios', {
+      body: { accion: 'crear_o_actualizar', email, nombre, rol, password }
     });
     if (error) throw error;
+    if (!data?.exito) throw new Error(data?.mensaje || 'No se pudo completar la operación.');
 
-    await sb.rpc('registrar_evento_admin', {
-      p_folio: 'N/A',
-      p_accion: 'ALTA_EDICION_USUARIO',
-      p_detalles: `${email} -> ${rol}`
-    });
-    alert('Usuario guardado correctamente.');
-    e.target.reset();
+    alert(data.mensaje);
+    limpiarFormUsuario();
     cargarUsuariosAdmin();
   } catch (err) {
-    alert('No se pudo guardar: ' + (err.message || err));
+    alert('Error: ' + (err.message || err));
   } finally {
     btn.disabled = false;
     btn.textContent = 'Guardar';
   }
+}
+
+function limpiarFormUsuario() {
+  document.getElementById('usrEmail').value = '';
+  document.getElementById('usrNombre').value = '';
+  document.getElementById('usrRol').value = 'Fase 1 (Salida)';
+  const p = document.getElementById('usrPass');
+  p.value = '';
+  p.required = true;
+  p.placeholder = 'Temporal';
 }
 
 async function cargarUsuariosAdmin() {
@@ -758,6 +763,7 @@ async function cargarUsuariosAdmin() {
       <td><small>${u.ultimo_login ? new Date(u.ultimo_login).toLocaleString('es-MX') : 'Sin ingreso'}</small></td>
       <td class="text-nowrap">${!esYo ? `
         <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="cargarUsuarioEnFormulario('${u.id}')">Editar</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="restablecerClaveAdmin('${u.id}')">Clave</button>
         <button type="button" class="btn btn-sm btn-outline-warning" onclick="alternarEstadoUsuario('${u.id}','${u.estado}')">${u.estado === 'Activo' ? 'Desactivar' : 'Activar'}</button>
       ` : '<span class="text-muted small">Tu cuenta</span>'}</td>`;
     tbody.appendChild(tr);
@@ -770,7 +776,23 @@ function cargarUsuarioEnFormulario(id) {
   document.getElementById('usrEmail').value = u.email;
   document.getElementById('usrNombre').value = u.nombre_completo;
   document.getElementById('usrRol').value = u.rol;
-  document.getElementById('usrEmail').focus();
+  const p = document.getElementById('usrPass');
+  p.value = '';
+  p.required = false;
+  p.placeholder = 'Opcional';
+  document.getElementById('usrNombre').focus();
+}
+
+async function restablecerClaveAdmin(id) {
+  const u = usuariosAdminGlobal.find(x => x.id === id);
+  const nueva = prompt(`Escribe la nueva contraseña temporal (mínimo 8 caracteres) para ${u ? u.email : 'el usuario'}:`);
+  if (!nueva) return;
+  if (nueva.length < 8) return alert('Debe tener mínimo 8 caracteres.');
+  const { data, error } = await sb.functions.invoke('admin-usuarios', {
+    body: { accion: 'cambiar_password', userId: id, newPassword: nueva }
+  });
+  if (error || !data?.exito) return alert('Error: ' + (data?.mensaje || error?.message));
+  alert(data.mensaje);
 }
 
 async function alternarEstadoUsuario(id, estadoActual) {
