@@ -45,7 +45,7 @@ function extraerDigitosFecha(fechaIso) {
 
 function bloqueEncabezadoLogos(logos) {
   if (logos.bandera) {
-    return { image: logos.bandera, width: 536, margin: [0, 0, 0, 8] };
+    return { image: logos.bandera, width: 536, margin: [0, 0, 0, 6] };
   }
   return { text: 'GOBIERNO DE MÉXICO | ISSSTE', bold: true, fontSize: 10, color: '#9F2241', margin: [0, 0, 0, 8] };
 }
@@ -63,19 +63,19 @@ function bloqueFirmasConLinea(izqNombre, izqCargo, derNombre, derCargo, marginTo
       widths: ['45%', '10%', '45%'],
       body: [
         [
-          { text: izqNombre, alignment: 'center', fontSize: 8.5, bold: true, border: [false, false, false, false], margin: [0, 0, 0, 3] },
+          { text: izqNombre, alignment: 'center', fontSize: 8.5, bold: true, border: [false, false, false, false], margin: [0, 0, 0, 2] },
           { text: '', border: [false, false, false, false] },
-          { text: derNombre, alignment: 'center', fontSize: 8.5, bold: true, border: [false, false, false, false], margin: [0, 0, 0, 3] }
+          { text: derNombre, alignment: 'center', fontSize: 8.5, bold: true, border: [false, false, false, false], margin: [0, 0, 0, 2] }
         ],
         [
-          { text: izqCargo, alignment: 'center', fontSize: 7.8, border: [false, true, false, false], margin: [0, 4, 0, 0] },
+          { text: izqCargo, alignment: 'center', fontSize: 7.8, border: [false, true, false, false], margin: [0, 3, 0, 0] },
           { text: '', border: [false, false, false, false] },
-          { text: derCargo, alignment: 'center', fontSize: 7.8, border: [false, true, false, false], margin: [0, 4, 0, 0] }
+          { text: derCargo, alignment: 'center', fontSize: 7.8, border: [false, true, false, false], margin: [0, 3, 0, 0] }
         ]
       ]
     },
     layout: { defaultBorder: true },
-    margin: [0, marginTop || 18, 0, 0]
+    margin: [0, marginTop || 14, 0, 0]
   };
 }
 
@@ -282,31 +282,31 @@ async function generarYDescargarPDF(d, tipoDocumento) {
     content.push({ text: 'ATENTAMENTE\n\n\n\nDR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL LEÓN', alignment: 'center', bold: true, fontSize: 10, lineHeight: 1.25, margin: [0, 0, 0, 10] });
     content.push(bloquePieLogos(logos));
 
-    // PÁGINA 5: AVISO DE COMISIÓN / ORDEN DE MINISTRACIÓN
+    // PÁGINA 5: AVISO DE COMISIÓN / ORDEN DE MINISTRACIÓN (COMPACTADO PARA QUE FIRMAS CABEN EN HOJA 5)
     content.push({ text: '', pageBreak: 'before' });
     content.push(bloqueEncabezadoLogos(logos));
-    content.push({ text: 'Aviso de Comisión / Orden de Ministración de Viáticos y Pasajes', alignment: 'center', bold: true, fontSize: 11, margin: [0, 0, 0, 6] });
-    content.push({ text: `Folio:\nOficio de comisión No. ${d.num_oficio}\nFecha: ${d.fecha_oficio_texto}`, alignment: 'right', bold: true, fontSize: 8.5, lineHeight: 1.2, margin: [0, 0, 0, 8] });
-    content.push({ text: 'I. Datos de la Unidad Administrativa', bold: true, fontSize: 9, margin: [0, 0, 0, 3] });
-    content.push({ text: 'Nombre y Clave:   HOSPITAL REGIONAL LEÓN    1120000000', fontSize: 8.5, margin: [14, 0, 0, 10] });
-    content.push({ text: 'II. Datos sobre el Servidor Público Comisionado', bold: true, fontSize: 9, margin: [0, 0, 0, 3] });
+    content.push({ text: 'Aviso de Comisión / Orden de Ministración de Viáticos y Pasajes', alignment: 'center', bold: true, fontSize: 10.5, margin: [0, 0, 0, 4] });
+    content.push({ text: `Folio:\nOficio de comisión No. ${d.num_oficio}\nFecha: ${d.fecha_oficio_texto}`, alignment: 'right', bold: true, fontSize: 8.5, lineHeight: 1.15, margin: [0, 0, 0, 5] });
+    content.push({ text: 'I. Datos de la Unidad Administrativa', bold: true, fontSize: 8.5, margin: [0, 0, 0, 2] });
+    content.push({ text: 'Nombre y Clave:   HOSPITAL REGIONAL LEÓN    1120000000', fontSize: 8.2, margin: [14, 0, 0, 6] });
+    content.push({ text: 'II. Datos sobre el Servidor Público Comisionado', bold: true, fontSize: 8.5, margin: [0, 0, 0, 2] });
     content.push({
       table: {
         widths: ['55%', '45%'],
-        heights: [15, 15, 15],
+        heights: [13, 13, 13],
         body: [
           [{ text: `Nombre:   ${d.camillero_nombre}`, bold: true }, `R.F.C.:   ${d.rfc_camillero}`],
           ['Cargo:   CAMILLERO', 'Domicilio:   PRADERA NO. 1101, COL. AZTECA, LEON GTO.'],
           ['Adscripción:   HOSPITAL REGIONAL LEÓN', `No. Empleado:   ${d.num_empleado}`]
         ]
       },
-      layout: 'noBorders', fontSize: 8.2, margin: [0, 0, 0, 10]
+      layout: 'noBorders', fontSize: 8, margin: [0, 0, 0, 6]
     });
-    content.push({ text: 'VIÁTICOS', bold: true, fontSize: 9, margin: [0, 2, 0, 3] });
+    content.push({ text: 'VIÁTICOS', bold: true, fontSize: 8.5, margin: [0, 1, 0, 2] });
     content.push({
       table: {
         widths: ['26%', '6%', '6%', '6%', '6%', '6%', '6%', '10%', '12%', '16%'],
-        heights: [13, 13, 13, 24],
+        heights: [12, 12, 12, 20],
         body: [
           [
             { text: 'Destino', rowSpan: 3, bold: true, fontSize: 8, alignment: 'center' },
@@ -328,79 +328,79 @@ async function generarYDescargarPDF(d, tipoDocumento) {
             {}, {}, {}
           ],
           [
-            { text: `${d.hospital}, ${d.ciudad}`, fontSize: 7.5, alignment: 'center', margin: [2, 3, 2, 3] },
-            { text: `${ini.d1}${ini.d2}`, fontSize: 8.5, alignment: 'center', margin: [0, 5, 0, 0] },
-            { text: `${ini.m1}${ini.m2}`, fontSize: 8.5, alignment: 'center', margin: [0, 5, 0, 0] },
-            { text: `${ini.a1}${ini.a2}`, fontSize: 8.5, alignment: 'center', margin: [0, 5, 0, 0] },
-            { text: `${fin.d1}${fin.d2}`, fontSize: 8.5, alignment: 'center', margin: [0, 5, 0, 0] },
-            { text: `${fin.m1}${fin.m2}`, fontSize: 8.5, alignment: 'center', margin: [0, 5, 0, 0] },
-            { text: `${fin.a1}${fin.a2}`, fontSize: 8.5, alignment: 'center', margin: [0, 5, 0, 0] },
-            { text: '1', fontSize: 8.5, alignment: 'center', margin: [0, 5, 0, 0] },
-            { text: '$ 490.00', fontSize: 8.5, alignment: 'center', margin: [0, 5, 0, 0] },
-            { text: '$ 490.00', fontSize: 8.5, alignment: 'center', margin: [0, 5, 0, 0] }
+            { text: `${d.hospital}, ${d.ciudad}`, fontSize: 7.5, alignment: 'center', margin: [2, 2, 2, 2] },
+            { text: `${ini.d1}${ini.d2}`, fontSize: 8.2, alignment: 'center', margin: [0, 3, 0, 0] },
+            { text: `${ini.m1}${ini.m2}`, fontSize: 8.2, alignment: 'center', margin: [0, 3, 0, 0] },
+            { text: `${ini.a1}${ini.a2}`, fontSize: 8.2, alignment: 'center', margin: [0, 3, 0, 0] },
+            { text: `${fin.d1}${fin.d2}`, fontSize: 8.2, alignment: 'center', margin: [0, 3, 0, 0] },
+            { text: `${fin.m1}${fin.m2}`, fontSize: 8.2, alignment: 'center', margin: [0, 3, 0, 0] },
+            { text: `${fin.a1}${fin.a2}`, fontSize: 8.2, alignment: 'center', margin: [0, 3, 0, 0] },
+            { text: '1', fontSize: 8.2, alignment: 'center', margin: [0, 3, 0, 0] },
+            { text: '$ 490.00', fontSize: 8.2, alignment: 'center', margin: [0, 3, 0, 0] },
+            { text: '$ 490.00', fontSize: 8.2, alignment: 'center', margin: [0, 3, 0, 0] }
           ]
         ]
       },
-      margin: [0, 0, 0, 10]
+      margin: [0, 0, 0, 7]
     });
     content.push({
       table: {
-        widths: ['18%', '10%', '14%', '10%', '18%', '30%'],
-        heights: [16],
+        widths: ['17%', '14%', '9%', '14%', '9%', '37%'],
+        heights: [15],
         body: [[
-          { text: 'Tipo de Viáticos:', border: [false, false, false, false], fontSize: 8.5, margin: [0, 2, 0, 0] },
-          { text: 'Anticipados', border: [false, false, false, false], fontSize: 8.5, alignment: 'right', margin: [0, 2, 0, 0] },
-          { text: 'X', alignment: 'center', fontSize: 8.5, bold: true, margin: [0, 2, 0, 0] },
-          { text: 'Devengados', border: [false, false, false, false], fontSize: 8.5, alignment: 'right', margin: [0, 2, 0, 0] },
-          { text: ' ', fontSize: 8.5 },
-          { text: 'TOTAL:     $ 490.00', bold: true, alignment: 'center', fontSize: 8.5, margin: [0, 2, 0, 0] }
+          { text: 'Tipo de Viáticos:', border: [false, false, false, false], fontSize: 8.2, margin: [0, 2, 0, 0] },
+          { text: 'Anticipados', noWrap: true, border: [false, false, false, false], fontSize: 8.2, alignment: 'right', margin: [0, 2, 0, 0] },
+          { text: 'X', alignment: 'center', fontSize: 8.2, bold: true, margin: [0, 2, 0, 0] },
+          { text: 'Devengados', noWrap: true, border: [false, false, false, false], fontSize: 8.2, alignment: 'right', margin: [0, 2, 0, 0] },
+          { text: ' ', fontSize: 8.2 },
+          { text: 'TOTAL:     $ 490.00', bold: true, alignment: 'center', fontSize: 8.2, margin: [0, 2, 0, 0] }
         ]]
       },
-      margin: [0, 0, 0, 10]
+      margin: [0, 0, 0, 7]
     });
     content.push({
-      text: [{ text: 'Importe Total con letra:     ', fontSize: 8.5 }, { text: 'CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', bold: true, decoration: 'underline', fontSize: 8.5 }],
-      margin: [0, 0, 0, 12]
+      text: [{ text: 'Importe Total con letra:     ', fontSize: 8.2 }, { text: 'CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', bold: true, decoration: 'underline', fontSize: 8.2 }],
+      margin: [0, 0, 0, 8]
     });
-    content.push({ text: 'PASAJES', bold: true, fontSize: 8.5, margin: [0, 0, 0, 4] });
+    content.push({ text: 'PASAJES', bold: true, fontSize: 8.2, margin: [0, 0, 0, 3] });
     content.push({
       table: {
-        widths: ['14%', '6%', '11%', '6%', '19%', '6%', '15%', '6%', '17%'],
-        heights: [16],
+        widths: ['13%', '5%', '10%', '5%', '22%', '5%', '16%', '5%', '19%'],
+        heights: [15],
         body: [[
-          { text: 'Pasajes Avión', border: [false, false, false, false], fontSize: 8, margin: [0, 2, 0, 0] },
+          { text: 'Pasajes Avión', border: [false, false, false, false], fontSize: 7.8, margin: [0, 2, 0, 0] },
           { text: ' ' },
-          { text: 'Autobús', border: [false, false, false, false], fontSize: 8, alignment: 'right', margin: [0, 2, 0, 0] },
+          { text: 'Autobús', border: [false, false, false, false], fontSize: 7.8, alignment: 'right', margin: [0, 2, 0, 0] },
           { text: ' ' },
-          { text: 'Automóvil Institucional', border: [false, false, false, false], fontSize: 8, alignment: 'right', margin: [0, 2, 0, 0] },
+          { text: 'Automóvil Institucional', border: [false, false, false, false], fontSize: 7.8, alignment: 'right', margin: [0, 2, 0, 0] },
           { text: ' ' },
-          { text: 'Otros Especificar', border: [false, false, false, false], fontSize: 8, alignment: 'right', margin: [0, 2, 0, 0] },
+          { text: 'Otros Especificar', border: [false, false, false, false], fontSize: 7.8, alignment: 'right', margin: [0, 2, 0, 0] },
           { text: ' ' },
-          { text: 'MONTO:', fontSize: 8, margin: [2, 2, 0, 0] }
+          { text: 'MONTO:', fontSize: 7.8, margin: [2, 2, 0, 0] }
         ]]
       },
-      margin: [0, 0, 0, 10]
+      margin: [0, 0, 0, 7]
     });
     content.push({
-      text: [{ text: 'Importe Total con letra:     ', fontSize: 8.5 }, { text: 'CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', bold: true, decoration: 'underline', fontSize: 8.5 }],
-      margin: [0, 0, 0, 10]
+      text: [{ text: 'Importe Total con letra:     ', fontSize: 8.2 }, { text: 'CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', bold: true, decoration: 'underline', fontSize: 8.2 }],
+      margin: [0, 0, 0, 7]
     });
-    content.push({ text: 'Nº de Tarjeta: _____________________________       Clave de Banco: _____________________________', fontSize: 8.5, margin: [0, 0, 0, 14] });
-    content.push({ text: 'IV. Objeto de la Comisión detallando el propósito de la misma:', bold: true, fontSize: 8.5, margin: [0, 0, 0, 3] });
+    content.push({ text: 'Nº de Tarjeta: _____________________________       Clave de Banco: _____________________________', fontSize: 8.2, margin: [0, 0, 0, 9] });
+    content.push({ text: 'IV. Objeto de la Comisión detallando el propósito de la misma:', bold: true, fontSize: 8.2, margin: [0, 0, 0, 2] });
     content.push({ canvas: [{ type: 'rect', x: 0, y: 0, w: 536, h: 4, color: '#000000' }], margin: [0, 0, 0, 0] });
     content.push({
       table: {
         widths: ['*'],
-        heights: [24],
-        body: [[{ text: `ACUDIR AL TRASLADO DEL PACIENTE ${d.paciente_nombre} AL ${d.hospital}, ${d.ciudad}.`, fontSize: 8.5, margin: [4, 5, 4, 5] }]]
+        heights: [20],
+        body: [[{ text: `ACUDIR AL TRASLADO DEL PACIENTE ${d.paciente_nombre} AL ${d.hospital}, ${d.ciudad}.`, fontSize: 8.2, margin: [4, 4, 4, 4] }]]
       },
-      margin: [0, 0, 0, 14]
+      margin: [0, 0, 0, 9]
     });
-    content.push({ text: 'V. Monto por Partida Presupuestal', bold: true, fontSize: 9, margin: [0, 0, 0, 6] });
+    content.push({ text: 'V. Monto por Partida Presupuestal', bold: true, fontSize: 8.5, margin: [0, 0, 0, 4] });
     content.push({
       table: {
         widths: ['28%', '72%'],
-        heights: [16, 16, 16, 16],
+        heights: [14, 14, 14, 14],
         body: [
           ['Para Viáticos', { text: '           $ 490.00           ', decoration: 'underline' }],
           ['Para Pasajes', { text: '           $ -                ', decoration: 'underline' }],
@@ -408,56 +408,56 @@ async function generarYDescargarPDF(d, tipoDocumento) {
           ['Importe con letra:', { text: 'CUATROCIENTOS NOVENTA PESOS 00/100 M.N.', decoration: 'underline' }]
         ]
       },
-      layout: 'noBorders', fontSize: 8.5, margin: [14, 0, 0, 28]
+      layout: 'noBorders', fontSize: 8.2, margin: [14, 0, 0, 12]
     });
     content.push(bloqueFirmasConLinea(
       `${d.camillero_nombre}\nCAMILLERO`, 'Nombre y Cargo del Comisionado',
-      'DR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL LEÓN', 'Nombre y Cargo del Responsable del Fondo', 18
+      'DR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL LEÓN', 'Nombre y Cargo del Responsable del Fondo', 12
     ));
 
-    // PÁGINA 6: DESGLOSE PORMENORIZADO DE GASTOS
+    // PÁGINA 6: DESGLOSE PORMENORIZADO DE GASTOS (AJUSTADO PARA QUE TODO CABE EN HOJA 6)
     content.push({ text: '', pageBreak: 'before' });
     content.push(bloqueEncabezadoLogos(logos));
-    content.push({ text: 'DIRECCIÓN DE ADMINISTRACIÓN Y FINANZAS\nSUBDIRECCIÓN DE PROGRAMACIÓN Y PRESUPUESTO\nDESGLOSE PORMENORIZADO DE GASTOS', alignment: 'center', bold: true, fontSize: 9.8, lineHeight: 1.2, margin: [0, 2, 0, 8] });
-    content.push({ text: `Oficio de comisión No. ${d.num_oficio}`, alignment: 'right', bold: true, fontSize: 9, margin: [0, 0, 0, 8] });
+    content.push({ text: 'DIRECCIÓN DE ADMINISTRACIÓN Y FINANZAS\nSUBDIRECCIÓN DE PROGRAMACIÓN Y PRESUPUESTO\nDESGLOSE PORMENORIZADO DE GASTOS', alignment: 'center', bold: true, fontSize: 9.5, lineHeight: 1.15, margin: [0, 0, 0, 5] });
+    content.push({ text: `Oficio de comisión No. ${d.num_oficio}`, alignment: 'right', bold: true, fontSize: 8.8, margin: [0, 0, 0, 5] });
     content.push({
       text: `UNIDAD EJECUTORA DEL GASTO: HOSPITAL REGIONAL LEÓN\nCOMISIONADO: ${d.camillero_nombre}\nDESTINO DE LA COMISIÓN: ${d.hospital}, ${d.ciudad}\nPERÍODO DE LA COMISIÓN: ${d.intervalo_fechas}`,
-      fontSize: 8.5, bold: true, lineHeight: 1.25, margin: [0, 0, 0, 10]
+      fontSize: 8.2, bold: true, lineHeight: 1.2, margin: [0, 0, 0, 7]
     });
-    content.push({ text: 'GASTOS CON COMPROBANTE', bold: true, fontSize: 8.5, margin: [0, 0, 0, 3] });
+    content.push({ text: 'GASTOS CON COMPROBANTE', bold: true, fontSize: 8.2, margin: [0, 0, 0, 2] });
     content.push({
       table: {
         widths: ['26%', '20%', '36%', '18%'],
-        heights: [16, 16, ...Array(9).fill(15), 16],
+        heights: [15, 15, ...Array(7).fill(13), 15],
         body: [
           [{ text: 'FECHA', bold: true, alignment: 'center' }, { text: 'NO. DE DOCUMENTO', bold: true, alignment: 'center' }, { text: 'DESCRIPCIÓN', bold: true, alignment: 'center' }, { text: 'IMPORTE', bold: true, alignment: 'center' }],
           [{ text: d.fecha_inicio_texto || d.fecha_oficio_texto, alignment: 'center' }, { text: 'S/FACTURA', alignment: 'center' }, { text: 'SIN COMPROBACIÓN', alignment: 'center' }, { text: '0.00', alignment: 'right' }],
-          ...Array.from({ length: 9 }, () => [' ', ' ', ' ', ' ']),
+          ...Array.from({ length: 7 }, () => [' ', ' ', ' ', ' ']),
           [{ text: 'TOTAL', colSpan: 3, bold: true, alignment: 'center' }, {}, {}, { text: '0.00', bold: true, alignment: 'right' }]
         ]
       },
-      fontSize: 8, margin: [0, 0, 0, 12]
+      fontSize: 7.8, margin: [0, 0, 0, 8]
     });
-    content.push({ text: 'GASTOS SIN COMPROBANTE', bold: true, fontSize: 8.5, margin: [0, 0, 0, 3] });
+    content.push({ text: 'GASTOS SIN COMPROBANTE', bold: true, fontSize: 8.2, margin: [0, 0, 0, 2] });
     content.push({
       table: {
         widths: ['28%', '54%', '18%'],
-        heights: [16, 16, ...Array(4).fill(15), 16],
+        heights: [15, 15, ...Array(3).fill(13), 15],
         body: [
           [{ text: 'FECHA', bold: true, alignment: 'center' }, { text: 'DESCRIPCIÓN', bold: true, alignment: 'center' }, { text: 'IMPORTE', bold: true, alignment: 'center' }],
           [{ text: d.fecha_inicio_texto || d.fecha_oficio_texto, alignment: 'center' }, { text: 'SIN COMPROBACIÓN', alignment: 'center' }, { text: '490.00', alignment: 'right' }],
-          ...Array.from({ length: 4 }, () => [' ', ' ', ' ']),
+          ...Array.from({ length: 3 }, () => [' ', ' ', ' ']),
           [{ text: 'TOTAL', colSpan: 2, bold: true, alignment: 'center' }, {}, { text: '490.00', bold: true, alignment: 'right' }]
         ]
       },
-      fontSize: 8, margin: [0, 0, 0, 10]
+      fontSize: 7.8, margin: [0, 0, 0, 7]
     });
-    content.push({ text: 'TOTAL COMPROBADO:   $ 490.00', alignment: 'right', bold: true, fontSize: 9.5, margin: [0, 0, 0, 18] });
+    content.push({ text: 'TOTAL COMPROBADO:   $ 490.00', alignment: 'right', bold: true, fontSize: 9, margin: [0, 0, 0, 12] });
     content.push(bloqueFirmasConLinea(
       `${d.camillero_nombre}\nCAMILLERO`, 'Nombre y Cargo del Comisionado',
-      'DR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL ISSSTE LEÓN', 'Nombre y cargo del Responsable del Fondo', 18
+      'DR. EDILBERTO HERNÁNDEZ CÁRDENAS\nDIRECTOR DEL HOSPITAL REGIONAL ISSSTE LEÓN', 'Nombre y cargo del Responsable del Fondo', 12
     ));
-    content.push({ text: 'DECLARO BAJO PROTESTA DE DECIR LA VERDAD QUE LOS IMPORTES REGISTRADOS EN EL PRESENTE DOCUMENTO FUERON EFECTIVAMENTE EROGADOS DURANTE EL PERÍODO DE LA COMISIÓN Y BAJO MI RESPONSABILIDAD MANIFIESTO DE CONFORMIDAD A LO ESTABLECIDO POR LA LEY GENERAL DE RESPONSABILIDADES ADMINISTRATIVAS.', alignment: 'center', fontSize: 7.5, margin: [0, 16, 0, 10] });
+    content.push({ text: 'DECLARO BAJO PROTESTA DE DECIR LA VERDAD QUE LOS IMPORTES REGISTRADOS EN EL PRESENTE DOCUMENTO FUERON EFECTIVAMENTE EROGADOS DURANTE EL PERÍODO DE LA COMISIÓN Y BAJO MI RESPONSABILIDAD MANIFIESTO DE CONFORMIDAD A LO ESTABLECIDO POR LA LEY GENERAL DE RESPONSABILIDADES ADMINISTRATIVAS.', alignment: 'center', fontSize: 7.5, margin: [0, 10, 0, 6] });
     content.push({ text: 'EN CASO NECESARIO UTILIZAR OTRO FORMATO                                   HOJA _____ DE _____.', fontSize: 7.5 });
 
     // PÁGINA 7: INFORME DE LA COMISIÓN
